@@ -13,6 +13,7 @@ import com.crs.iamservice.service.RefreshTokenService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -77,5 +78,10 @@ public class AuthenticationController {
     public ResponseEntity<String> logout(@RequestBody LogoutRequest request) {
         authenticationService.logout(request);
         return ResponseEntity.ok("Đăng xuất thành công");
+    }
+    @PostMapping("/change-password")
+    public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        authenticationService.changePassword(request);
+        return ResponseEntity.ok("Đổi mật khẩu thành công!");
     }
 }
