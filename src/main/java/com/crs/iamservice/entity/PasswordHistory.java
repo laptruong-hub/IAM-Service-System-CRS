@@ -3,7 +3,11 @@ package com.crs.iamservice.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.repository.query.Param;
+
+import java.awt.print.Pageable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "password_history")
@@ -25,11 +29,11 @@ public class PasswordHistory {
     @Column(name = "password_hash", nullable = false)
     String passwordHash;
 
-    @Column(name = "created_at")
-    LocalDateTime createdAt;
+    @Column(name = "change_at")
+    LocalDateTime changeAt;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
+        changeAt = LocalDateTime.now();
     }
 }

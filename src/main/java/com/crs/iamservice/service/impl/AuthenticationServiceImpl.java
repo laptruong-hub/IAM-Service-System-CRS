@@ -1,14 +1,14 @@
 package com.crs.iamservice.service.impl;
 
 import com.crs.iamservice.config.UserPrincipal;
-import com.crs.iamservice.dto.request.AuthenticationRequest;
-import com.crs.iamservice.dto.request.IntrospectRequest;
-import com.crs.iamservice.dto.request.LogoutRequest;
-import com.crs.iamservice.dto.request.RegisterRequest;
+import com.crs.iamservice.dto.request.*;
 import com.crs.iamservice.dto.response.AuthenticationResponse;
 import com.crs.iamservice.dto.response.IntrospectResponse;
 import com.crs.iamservice.dto.response.RegisterResponse;
 import com.crs.iamservice.dto.response.UserResponse;
+import com.crs.iamservice.entity.PasswordHistory;
+import com.crs.iamservice.dto.request.ChangePasswordRequest;
+import com.crs.iamservice.repository.PasswordHistoryRepository;
 import com.crs.iamservice.entity.RefreshToken;
 import com.crs.iamservice.entity.User;
 import com.crs.iamservice.repository.RoleRepository;
@@ -18,11 +18,14 @@ import com.crs.iamservice.service.JwtService;
 import com.crs.iamservice.service.RefreshTokenService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +37,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final JwtService jwtService; // Inject Interface
     private final AuthenticationManager authenticationManager;
     private final RefreshTokenService refreshTokenService;
+    private final PasswordHistoryRepository passwordHistoryRepository;
 
     @Override
     public RegisterResponse register(RegisterRequest request) {
@@ -137,4 +141,47 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         // Xóa SecurityContext để đảm bảo phiên làm việc hiện tại bị ngắt hoàn toàn
         SecurityContextHolder.clearContext();
     }
+
+    @Override
+    @Transactional
+    public void changePassword(ChangePasswordRequest request) {
+        // Lấy thông tin User đang đăng nhập từ SecurityContext
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        var user = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+
+        // Kiểm tra mật khẩu cũ có khớp không
+        if (!passwordEncoder.matches(request.oldPassword(), user.getPasswordHash())) {
+            throw new RuntimeException("Mật khẩu cũ không chính xác!");
+        }
+        // KIỂM TRA MẬT KHẨU MỚI CÓ TRÙNG 3 LẦN GẦN NHẤT KHÔNG
+        // Kiểm tra trực tiếp với mật khẩu hiện tại
+        if (passwordEncoder.matches(request.newPassword(), user.getPasswordHash())) {
+            throw new RuntimeException("Mật khẩu mới không được trùng với mật khẩu hiện tại!");
+        }
+
+        // Lấy 3 mật khẩu cũ nhất từ lịch sử
+        List<PasswordHistory> oldPasswords = passwordHistoryRepository.findTopNByUser(user, PageRequest.of(0, 3));
+
+        for (PasswordHistory history : oldPasswords) {
+            if (passwordEncoder.matches(request.newPassword(), history.getPasswordHash())) {
+                throw new RuntimeException("Bạn không được sử dụng lại mật khẩu trong 3 lần gần nhất!");
+            }
+        }
+        // Lưu mật khẩu hiện tại vào lịch sử TRƯỚC khi thay đổi
+        PasswordHistory history = PasswordHistory.builder()
+                .user(user)
+                .passwordHash(user.getPasswordHash())
+                .build();
+        passwordHistoryRepository.save(history);
+
+        // Cập nhật mật khẩu mới
+        user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(user);
+
+        //  Xóa tất cả Refresh Tokens để bắt buộc đăng nhập lại trên mọi thiết bị
+        refreshTokenService.deleteByToken(user.getUserId());
+    }
+
+
 }
