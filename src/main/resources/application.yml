@@ -6,9 +6,10 @@ spring:
     name: iam-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/iam_service_db
-    username: postgres
-    password: 123456
+    # 'postgres-db' là tên service chúng ta đặt trong docker-compose.yml
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/iam_service_db}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:123456}
 
   jpa:
     hibernate:
