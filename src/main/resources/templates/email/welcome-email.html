@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chào mừng đến với Car Rental System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7fa;
+            line-height: 1.6;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #ffffff;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header .logo {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .content {
+            padding: 40px 30px;
+        }
+        
+        .greeting {
+            font-size: 22px;
+            color: #333333;
+            margin-bottom: 20px;
+        }
+        
+        .message {
+            color: #666666;
+            font-size: 16px;
+            margin-bottom: 25px;
+        }
+        
+        .features {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .features h3 {
+            color: #333333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            color: #555555;
+        }
+        
+        .feature-icon {
+            margin-right: 12px;
+            font-size: 20px;
+        }
+        
+        .account-info {
+            background-color: #e8f4fd;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .account-info h4 {
+            color: #333333;
+            margin-bottom: 10px;
+        }
+        
+        .account-info p {
+            color: #666666;
+            margin: 5px 0;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff !important;
+            text-decoration: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .cta-button:hover {
+            opacity: 0.9;
+        }
+        
+        .divider {
+            height: 1px;
+            background-color: #e0e0e0;
+            margin: 30px 0;
+        }
+        
+        .footer {
+            background-color: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .footer p {
+            color: #999999;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        
+        .social-links {
+            margin: 20px 0;
+        }
+        
+        .social-links a {
+            display: inline-block;
+            margin: 0 10px;
+            font-size: 24px;
+            text-decoration: none;
+        }
+        
+        .support-info {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #ffffff;
+            border-radius: 8px;
+        }
+        
+        .support-info a {
+            color: #667eea;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">🚗</div>
+            <h1 th:text="${applicationName}">Car Rental System</h1>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <h2 class="greeting">
+                Xin chào <span th:text="${fullName}">Quý khách</span>! 👋
+            </h2>
+            
+            <p class="message">
+                Chúc mừng bạn đã đăng ký tài khoản thành công tại <strong th:text="${applicationName}">Car Rental System</strong>! 
+                Chúng tôi rất vui mừng được chào đón bạn trở thành thành viên của gia đình chúng tôi.
+            </p>
+            
+            <!-- Features -->
+            <div class="features">
+                <h3>🎁 Với tài khoản của bạn, bạn có thể:</h3>
+                <div class="feature-item">
+                    <span class="feature-icon">🚙</span>
+                    <span>Duyệt và đặt thuê xe dễ dàng</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">📋</span>
+                    <span>Quản lý lịch sử đặt xe của bạn</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">💳</span>
+                    <span>Thanh toán an toàn và tiện lợi</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">⭐</span>
+                    <span>Nhận ưu đãi và khuyến mãi đặc biệt</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">📞</span>
+                    <span>Hỗ trợ khách hàng 24/7</span>
+                </div>
+            </div>
+            
+            <!-- Account Info -->
+            <div class="account-info">
+                <h4>📧 Thông tin tài khoản của bạn:</h4>
+                <p><strong>Email:</strong> <span th:text="${email}">user@example.com</span></p>
+                <p><strong>Họ tên:</strong> <span th:text="${fullName}">Tên người dùng</span></p>
+            </div>
+            
+            <div style="text-align: center;">
+                <a href="#" class="cta-button">🚀 Bắt đầu khám phá</a>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <p class="message">
+                Nếu bạn có bất kỳ câu hỏi nào, đừng ngần ngại liên hệ với đội ngũ hỗ trợ của chúng tôi. 
+                Chúng tôi luôn sẵn sàng giúp đỡ bạn!
+            </p>
+            
+            <p style="color: #666666;">
+                Trân trọng,<br>
+                <strong>Đội ngũ Car Rental System</strong>
+            </p>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <div class="social-links">
+                <a href="#">📘</a>
+                <a href="#">📸</a>
+                <a href="#">🐦</a>
+            </div>
+            
+            <div class="support-info">
+                <p>Cần hỗ trợ? Liên hệ chúng tôi:</p>
+                <p>
+                    <a th:href="'mailto:' + ${supportEmail}" th:text="${supportEmail}">support@example.com</a>
+                </p>
+            </div>
+            
+            <p style="margin-top: 20px;">
+                © <span th:text="${year}">2026</span> <span th:text="${applicationName}">Car Rental System</span>. All rights reserved.
+            </p>
+            
+            <p style="font-size: 12px; color: #bbbbbb; margin-top: 15px;">
+                Email này được gửi tự động, vui lòng không trả lời trực tiếp.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
