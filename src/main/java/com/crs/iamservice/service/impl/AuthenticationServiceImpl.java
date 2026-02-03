@@ -8,6 +8,7 @@ import com.crs.iamservice.dto.response.RegisterResponse;
 import com.crs.iamservice.dto.response.UserResponse;
 import com.crs.iamservice.entity.PasswordHistory;
 import com.crs.iamservice.dto.request.ChangePasswordRequest;
+import com.crs.iamservice.event.UserRegistrationEvent;
 import com.crs.iamservice.repository.PasswordHistoryRepository;
 import com.crs.iamservice.entity.RefreshToken;
 import com.crs.iamservice.entity.User;
@@ -18,6 +19,7 @@ import com.crs.iamservice.service.JwtService;
 import com.crs.iamservice.service.RefreshTokenService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -38,6 +40,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final RefreshTokenService refreshTokenService;
     private final PasswordHistoryRepository passwordHistoryRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public RegisterResponse register(RegisterRequest request) {
@@ -60,6 +63,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .build();
 
         userRepository.save(user);
+
+        // 4. Publish event để gửi email chào mừng (async - không block)
+        eventPublisher.publishEvent(new UserRegistrationEvent(this, user.getEmail(), user.getFullName()));
 
         return RegisterResponse.builder()
                 .message("Đăng ký tài khoản thành công!")
