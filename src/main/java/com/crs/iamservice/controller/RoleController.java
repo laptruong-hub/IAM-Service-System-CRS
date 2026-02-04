@@ -24,7 +24,7 @@ public class RoleController {
      * Tạo role mới
      */
     @PostMapping
-    @PreAuthorize("hasAuthority('CREATE_ROLES')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('CREATE_ROLES')")
     public ResponseEntity<RoleResponse> createRole(@Valid @RequestBody CreateRoleRequest request) {
         RoleResponse response = roleService.createRole(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -34,7 +34,7 @@ public class RoleController {
      * Lấy role theo ID
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('VIEW_ROLES')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('VIEW_ROLES')")
     public ResponseEntity<RoleResponse> getRoleById(@PathVariable Long id) {
         RoleResponse response = roleService.getRoleById(id);
         return ResponseEntity.ok(response);
@@ -44,7 +44,7 @@ public class RoleController {
      * Lấy role theo tên
      */
     @GetMapping("/name/{name}")
-    @PreAuthorize("hasAuthority('VIEW_ROLES')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('VIEW_ROLES')")
     public ResponseEntity<RoleResponse> getRoleByName(@PathVariable String name) {
         RoleResponse response = roleService.getRoleByName(name);
         return ResponseEntity.ok(response);
@@ -54,7 +54,7 @@ public class RoleController {
      * Lấy tất cả roles
      */
     @GetMapping
-    @PreAuthorize("hasAuthority('VIEW_ROLES')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('VIEW_ROLES')")
     public ResponseEntity<List<RoleResponse>> getAllRoles() {
         List<RoleResponse> response = roleService.getAllRoles();
         return ResponseEntity.ok(response);
@@ -64,7 +64,7 @@ public class RoleController {
      * Lấy tất cả roles đang active
      */
     @GetMapping("/active")
-    @PreAuthorize("hasAuthority('VIEW_ROLES')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('VIEW_ROLES')")
     public ResponseEntity<List<RoleResponse>> getActiveRoles() {
         List<RoleResponse> response = roleService.getActiveRoles();
         return ResponseEntity.ok(response);
@@ -74,7 +74,7 @@ public class RoleController {
      * Cập nhật role
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('UPDATE_ROLES')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('UPDATE_ROLES')")
     public ResponseEntity<RoleResponse> updateRole(
             @PathVariable Long id,
             @Valid @RequestBody UpdateRoleRequest request) {
@@ -86,7 +86,7 @@ public class RoleController {
      * Gán permissions cho role
      */
     @PostMapping("/{id}/permissions")
-    @PreAuthorize("hasAuthority('UPDATE_ROLES')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('UPDATE_ROLES')")
     public ResponseEntity<RoleResponse> assignPermissions(
             @PathVariable Long id,
             @RequestBody List<String> permissionIds) {
@@ -98,7 +98,7 @@ public class RoleController {
      * Xóa permissions khỏi role
      */
     @DeleteMapping("/{id}/permissions")
-    @PreAuthorize("hasAuthority('UPDATE_ROLES')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('UPDATE_ROLES')")
     public ResponseEntity<RoleResponse> removePermissions(
             @PathVariable Long id,
             @RequestBody List<String> permissionIds) {
@@ -110,7 +110,7 @@ public class RoleController {
      * Xóa role
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('DELETE_ROLES')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('DELETE_ROLES')")
     public ResponseEntity<Void> deleteRole(@PathVariable Long id) {
         roleService.deleteRole(id);
         return ResponseEntity.noContent().build();
@@ -120,7 +120,7 @@ public class RoleController {
      * Kích hoạt role
      */
     @PatchMapping("/{id}/activate")
-    @PreAuthorize("hasAuthority('UPDATE_ROLES')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('UPDATE_ROLES')")
     public ResponseEntity<String> activateRole(@PathVariable Long id) {
         roleService.activateRole(id);
         return ResponseEntity.ok("Role đã được kích hoạt");
@@ -130,7 +130,7 @@ public class RoleController {
      * Vô hiệu hóa role
      */
     @PatchMapping("/{id}/deactivate")
-    @PreAuthorize("hasAuthority('UPDATE_ROLES')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('UPDATE_ROLES')")
     public ResponseEntity<String> deactivateRole(@PathVariable Long id) {
         roleService.deactivateRole(id);
         return ResponseEntity.ok("Role đã bị vô hiệu hóa");
