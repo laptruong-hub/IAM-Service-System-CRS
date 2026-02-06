@@ -8,8 +8,11 @@ import com.crs.iamservice.dto.response.RegisterResponse;
 import com.crs.iamservice.dto.response.UserResponse;
 import com.crs.iamservice.entity.PasswordHistory;
 import com.crs.iamservice.dto.request.ChangePasswordRequest;
+import com.crs.iamservice.entity.PasswordResetToken;
+import com.crs.iamservice.event.PasswordResetEvent;
 import com.crs.iamservice.event.UserRegistrationEvent;
 import com.crs.iamservice.repository.PasswordHistoryRepository;
+import com.crs.iamservice.repository.PasswordResetTokenRepository;
 import com.crs.iamservice.entity.RefreshToken;
 import com.crs.iamservice.entity.User;
 import com.crs.iamservice.repository.RoleRepository;
@@ -27,6 +30,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -36,11 +41,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService; // Inject Interface
+    private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final RefreshTokenService refreshTokenService;
     private final PasswordHistoryRepository passwordHistoryRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final ApplicationEventPublisher eventPublisher;
+
+    private static final int OTP_LENGTH = 6;
+    private static final int OTP_EXPIRY_MINUTES = 5;
 
     @Override
     public RegisterResponse register(RegisterRequest request) {
@@ -189,5 +198,110 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         refreshTokenService.deleteByToken(user.getUserId());
     }
 
+    // ==================== FORGOT PASSWORD FLOW ====================
+
+    @Override
+    @Transactional
+    public void forgotPassword(ForgotPasswordRequest request) {
+        // 1. Kiểm tra email có tồn tại trong hệ thống không
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản với email: " + request.email()));
+
+        // 2. Xóa tất cả token cũ của email này (tránh spam)
+        passwordResetTokenRepository.deleteAllByEmail(request.email());
+
+        // 3. Tạo mã OTP 6 chữ số
+        String resetCode = generateOTP();
+
+        // 4. Lưu token vào database
+        PasswordResetToken resetToken = PasswordResetToken.builder()
+                .email(request.email())
+                .resetCode(resetCode)
+                .expiresAt(LocalDateTime.now().plusMinutes(OTP_EXPIRY_MINUTES))
+                .isUsed(false)
+                .isVerified(false)
+                .build();
+
+        passwordResetTokenRepository.save(resetToken);
+
+        // 5. Publish event để gửi email async (không block response)
+        eventPublisher.publishEvent(new PasswordResetEvent(this, user.getEmail(), user.getFullName(), resetCode));
+    }
+
+    @Override
+    @Transactional
+    public void verifyResetCode(VerifyResetCodeRequest request) {
+        // 1. Tìm token chưa sử dụng theo email + mã OTP
+        PasswordResetToken resetToken = passwordResetTokenRepository
+                .findByEmailAndResetCodeAndIsUsedFalse(request.email(), request.resetCode())
+                .orElseThrow(() -> new RuntimeException("Mã xác nhận không hợp lệ hoặc đã được sử dụng"));
+
+        // 2. Kiểm tra hết hạn
+        if (resetToken.isExpired()) {
+            throw new RuntimeException("Mã xác nhận đã hết hạn. Vui lòng yêu cầu mã mới.");
+        }
+
+        // 3. Đánh dấu đã xác minh
+        resetToken.setVerified(true);
+        passwordResetTokenRepository.save(resetToken);
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        // 1. Tìm token đã xác minh nhưng chưa sử dụng
+        PasswordResetToken resetToken = passwordResetTokenRepository
+                .findByEmailAndResetCodeAndIsVerifiedTrueAndIsUsedFalse(request.email(), request.resetCode())
+                .orElseThrow(() -> new RuntimeException("Mã xác nhận chưa được xác minh hoặc đã sử dụng. Vui lòng thực hiện lại."));
+
+        // 2. Kiểm tra hết hạn lần nữa (phòng trường hợp quá lâu giữa verify và reset)
+        if (resetToken.isExpired()) {
+            throw new RuntimeException("Mã xác nhận đã hết hạn. Vui lòng yêu cầu mã mới.");
+        }
+
+        // 3. Tìm user
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản"));
+
+        // 4. Kiểm tra mật khẩu mới không trùng mật khẩu hiện tại
+        if (passwordEncoder.matches(request.newPassword(), user.getPasswordHash())) {
+            throw new RuntimeException("Mật khẩu mới không được trùng với mật khẩu hiện tại!");
+        }
+
+        // 5. Kiểm tra 3 mật khẩu gần nhất trong lịch sử
+        List<PasswordHistory> oldPasswords = passwordHistoryRepository.findTopNByUser(user, PageRequest.of(0, 3));
+        for (PasswordHistory history : oldPasswords) {
+            if (passwordEncoder.matches(request.newPassword(), history.getPasswordHash())) {
+                throw new RuntimeException("Bạn không được sử dụng lại mật khẩu trong 3 lần gần nhất!");
+            }
+        }
+
+        // 6. Lưu mật khẩu hiện tại vào lịch sử
+        PasswordHistory history = PasswordHistory.builder()
+                .user(user)
+                .passwordHash(user.getPasswordHash())
+                .build();
+        passwordHistoryRepository.save(history);
+
+        // 7. Cập nhật mật khẩu mới
+        user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(user);
+
+        // 8. Đánh dấu token đã sử dụng
+        resetToken.setUsed(true);
+        passwordResetTokenRepository.save(resetToken);
+
+        // 9. Xóa tất cả refresh tokens để buộc đăng nhập lại
+        refreshTokenService.deleteByToken(user.getUserId());
+    }
+
+    /**
+     * Tạo mã OTP ngẫu nhiên gồm 6 chữ số
+     */
+    private String generateOTP() {
+        SecureRandom random = new SecureRandom();
+        int otp = 100000 + random.nextInt(900000); // Luôn có 6 chữ số (100000 - 999999)
+        return String.valueOf(otp);
+    }
 
 }

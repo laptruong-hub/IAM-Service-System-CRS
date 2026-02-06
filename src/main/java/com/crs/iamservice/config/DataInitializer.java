@@ -40,6 +40,9 @@ public class DataInitializer implements CommandLineRunner {
             Permission pViewTrip = createPermission("VIEW_TRIP_DETAILS", "Quyền xem chi tiết chuyến đi");
             Permission pUpdateTrip = createPermission("UPDATE_TRIP_STATUS", "Quyền cập nhật trạng thái chuyến đi");
             Permission pReportIssue = createPermission("REPORT_CAR_ISSUE", "Quyền báo cáo sự cố xe");
+            Permission pManagePermissions = createPermission("MANAGE_PERMISSIONS", "Quyền quản lý quyền hạn");
+            Permission pManageRoles = createPermission("MANAGE_ROLES", "Quyền quản lý vai trò");
+
 
             // 2. Tạo Roles (Vai trò) và gán Permission
             // Role CUSTOMER
@@ -62,6 +65,8 @@ public class DataInitializer implements CommandLineRunner {
             adminPerms.add(pManageFleet);
             adminPerms.add(pViewTrip);
             adminPerms.add(pUpdateTrip);
+            adminPerms.add(pManageRoles);
+            adminPerms.add(pManagePermissions);
             Role roleAdmin = createRole("ADMIN", adminPerms);
 
             // Role DRIVER
