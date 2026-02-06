@@ -84,4 +84,31 @@ public class AuthenticationController {
         authenticationService.changePassword(request);
         return ResponseEntity.ok("Đổi mật khẩu thành công!");
     }
+
+    /**
+     * Bước 1: Gửi mã OTP về email
+     */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authenticationService.forgotPassword(request);
+        return ResponseEntity.ok("Mã xác nhận đã được gửi về email của bạn. Vui lòng kiểm tra hộp thư.");
+    }
+
+    /**
+     * Bước 2: Xác minh mã OTP
+     */
+    @PostMapping("/verify-reset-code")
+    public ResponseEntity<String> verifyResetCode(@Valid @RequestBody VerifyResetCodeRequest request) {
+        authenticationService.verifyResetCode(request);
+        return ResponseEntity.ok("Xác minh mã thành công. Bạn có thể đặt mật khẩu mới.");
+    }
+
+    /**
+     * Bước 3: Đặt mật khẩu mới
+     */
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authenticationService.resetPassword(request);
+        return ResponseEntity.ok("Đặt lại mật khẩu thành công! Vui lòng đăng nhập với mật khẩu mới.");
+    }
 }

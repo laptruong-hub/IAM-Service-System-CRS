@@ -14,4 +14,19 @@ public interface AuthenticationService {
     UserResponse getMyProfile();
     void logout(LogoutRequest request);
     void changePassword(ChangePasswordRequest request);
+
+    /**
+     * Bước 1: Gửi mã OTP về email để reset mật khẩu
+     */
+    void forgotPassword(ForgotPasswordRequest request);
+
+    /**
+     * Bước 2: Xác minh mã OTP
+     */
+    void verifyResetCode(VerifyResetCodeRequest request);
+
+    /**
+     * Bước 3: Đặt mật khẩu mới sau khi xác minh OTP thành công
+     */
+    void resetPassword(ResetPasswordRequest request);
 }

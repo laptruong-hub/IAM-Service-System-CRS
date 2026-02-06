@@ -43,6 +43,22 @@ public class EmailServiceImpl implements EmailService {
         
         sendHtmlEmail(toEmail, subject, "email/welcome-email", variables);
     }
+
+    @Override
+    public void sendPasswordResetEmail(String toEmail, String fullName, String resetCode) {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("fullName", fullName);
+        variables.put("email", toEmail);
+        variables.put("resetCode", resetCode);
+        variables.put("expiryMinutes", 5);
+        variables.put("applicationName", "Car Rental System");
+        variables.put("supportEmail", fromEmail);
+        variables.put("year", java.time.Year.now().getValue());
+
+        String subject = "🔐 Mã xác nhận đặt lại mật khẩu - Car Rental System";
+
+        sendHtmlEmail(toEmail, subject, "email/password-reset", variables);
+    }
     
     @Override
     public void sendSimpleEmail(String toEmail, String subject, String body) {

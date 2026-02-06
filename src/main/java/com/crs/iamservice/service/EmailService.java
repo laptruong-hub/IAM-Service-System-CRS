@@ -7,25 +7,24 @@ public interface EmailService {
     
     /**
      * Gửi email chào mừng khi user đăng ký thành công
-     * @param toEmail Email người nhận
-     * @param fullName Tên đầy đủ của user
      */
     void sendWelcomeEmail(String toEmail, String fullName);
+
+    /**
+     * Gửi email chứa mã OTP để reset mật khẩu
+     * @param toEmail Email người nhận
+     * @param fullName Tên đầy đủ của user
+     * @param resetCode Mã OTP 6 chữ số
+     */
+    void sendPasswordResetEmail(String toEmail, String fullName, String resetCode);
     
     /**
      * Gửi email đơn giản (text)
-     * @param toEmail Email người nhận
-     * @param subject Tiêu đề email
-     * @param body Nội dung email
      */
     void sendSimpleEmail(String toEmail, String subject, String body);
     
     /**
      * Gửi email với template HTML
-     * @param toEmail Email người nhận
-     * @param subject Tiêu đề email
-     * @param templateName Tên template
-     * @param variables Các biến truyền vào template
      */
     void sendHtmlEmail(String toEmail, String subject, String templateName, java.util.Map<String, Object> variables);
 }
