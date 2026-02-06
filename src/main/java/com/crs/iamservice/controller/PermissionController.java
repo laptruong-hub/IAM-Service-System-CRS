@@ -24,7 +24,7 @@ public class PermissionController {
      * Tạo permission mới
      */
     @PostMapping
-    @PreAuthorize("hasAuthority('CREATE_PERMISSIONS')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_PERMISSIONS')")
     public ResponseEntity<PermissionResponse> createPermission(
             @Valid @RequestBody CreatePermissionRequest request) {
         PermissionResponse response = permissionService.createPermission(request);
@@ -35,7 +35,7 @@ public class PermissionController {
      * Lấy permission theo ID
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('VIEW_PERMISSIONS')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_PERMISSIONS')")
     public ResponseEntity<PermissionResponse> getPermissionById(@PathVariable String id) {
         PermissionResponse response = permissionService.getPermissionById(id);
         return ResponseEntity.ok(response);
@@ -45,7 +45,7 @@ public class PermissionController {
      * Lấy tất cả permissions
      */
     @GetMapping
-    @PreAuthorize("hasAuthority('VIEW_PERMISSIONS')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_PERMISSIONS')")
     public ResponseEntity<List<PermissionResponse>> getAllPermissions() {
         List<PermissionResponse> response = permissionService.getAllPermissions();
         return ResponseEntity.ok(response);
@@ -55,7 +55,7 @@ public class PermissionController {
      * Cập nhật permission
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('UPDATE_PERMISSIONS')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_PERMISSIONS')")
     public ResponseEntity<PermissionResponse> updatePermission(
             @PathVariable String id,
             @Valid @RequestBody UpdatePermissionRequest request) {
@@ -67,7 +67,7 @@ public class PermissionController {
      * Xóa permission
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('DELETE_PERMISSIONS')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_PERMISSIONS')")
     public ResponseEntity<Void> deletePermission(@PathVariable String id) {
         permissionService.deletePermission(id);
         return ResponseEntity.noContent().build();

@@ -15,9 +15,9 @@ public record UserPrincipal(
 ) implements UserDetails {
 
     public static UserPrincipal create(User user) {
-        // Lấy quyền từ Permissions
+        // Lấy quyền từ action của Permissions
         var authorities = user.getRole().getPermissions().stream()
-                .map(p -> new SimpleGrantedAuthority(p.getId()))
+                .map(p -> new SimpleGrantedAuthority(p.getAction()))
                 .collect(Collectors.toList());
 
         // Thêm quyền từ Role (định dạng ROLE_ADMIN)
