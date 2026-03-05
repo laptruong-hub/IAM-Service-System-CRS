@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -30,4 +31,7 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.role r LEFT JOIN FETCH r.permissions WHERE u.userId = :userId")
     Optional<User> findByIdWithRoleAndPermissions(@Param("userId") String userId);
+
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.role r WHERE UPPER(r.name) = UPPER(:roleName) AND u.isActive = true AND u.isDeleted = false")
+    List<User> findActiveUsersByRoleName(@Param("roleName") String roleName);
 }
