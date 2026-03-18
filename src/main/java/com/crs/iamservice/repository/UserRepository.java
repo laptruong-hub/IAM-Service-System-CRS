@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,4 +35,16 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.role r WHERE UPPER(r.name) = UPPER(:roleName) AND u.isActive = true AND u.isDeleted = false")
     List<User> findActiveUsersByRoleName(@Param("roleName") String roleName);
+
+    @Query("SELECT COUNT(u) FROM User u WHERE u.isDeleted = false")
+    long countTotalActiveUsers();
+
+    @Query("SELECT COUNT(u) FROM User u WHERE UPPER(u.role.name) = 'CUSTOMER' AND u.isDeleted = false")
+    long countTotalCustomers();
+
+    @Query("SELECT COUNT(u) FROM User u WHERE UPPER(u.role.name) = 'CUSTOMER' AND u.isDeleted = false AND u.createdAt >= :since")
+    long countNewCustomersSince(@Param("since") LocalDateTime since);
+
+    @Query("SELECT COUNT(u) FROM User u WHERE UPPER(u.role.name) = 'DRIVER' AND u.isDeleted = false")
+    long countTotalDrivers();
 }
