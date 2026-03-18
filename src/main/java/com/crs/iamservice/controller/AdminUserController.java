@@ -6,6 +6,7 @@ import com.crs.iamservice.dto.request.AdminUserUpdateRequest;
 import com.crs.iamservice.dto.request.UserSearchRequest;
 import com.crs.iamservice.dto.response.AdminUserResponse;
 import com.crs.iamservice.dto.response.PageResponse;
+import com.crs.iamservice.dto.response.UserStatsResponse;
 import com.crs.iamservice.service.AdminUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -125,6 +126,15 @@ public class AdminUserController {
     @Operation(summary = "Vô hiệu hóa user", description = "Vô hiệu hóa tài khoản user")
     public ResponseEntity<AdminUserResponse> deactivateUser(@PathVariable String userId) {
         AdminUserResponse response = adminUserService.deactivateUser(userId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/stats")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Thống kê user cho dashboard", description = "Trả về tổng số user, khách hàng mới, tài xế — dùng cho admin dashboard")
+    public ResponseEntity<UserStatsResponse> getUserStats(
+            @RequestParam(defaultValue = "7") int days) {
+        UserStatsResponse response = adminUserService.getUserStats(days);
         return ResponseEntity.ok(response);
     }
 

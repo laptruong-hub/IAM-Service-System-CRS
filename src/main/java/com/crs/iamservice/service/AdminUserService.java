@@ -6,6 +6,7 @@ import com.crs.iamservice.dto.request.AdminUserUpdateRequest;
 import com.crs.iamservice.dto.request.UserSearchRequest;
 import com.crs.iamservice.dto.response.AdminUserResponse;
 import com.crs.iamservice.dto.response.PageResponse;
+import com.crs.iamservice.dto.response.UserStatsResponse;
 import org.springframework.data.domain.Pageable;
 
 public interface AdminUserService {
@@ -54,4 +55,10 @@ public interface AdminUserService {
      * Admin reset mật khẩu cho user
      */
     void resetUserPassword(String userId, AdminPasswordResetRequest request);
+
+    /**
+     * Lấy thống kê user cho admin dashboard
+     * @param days khoảng thời gian tính "khách mới" (ví dụ: 7 = 7 ngày qua)
+     */
+    UserStatsResponse getUserStats(int days);
 }

@@ -22,6 +22,7 @@ import com.crs.iamservice.service.JwtService;
 import com.crs.iamservice.service.RefreshTokenService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import java.util.Map;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -93,13 +94,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         var userPrincipal = UserPrincipal.create(user);
-        String accessToken = jwtService.generateToken(userPrincipal);
+        // Nhúng userId UUID vào JWT claims để FE decode được mà không cần gọi thêm API
+        String accessToken = jwtService.generateToken(
+                Map.of("userId", user.getUserId()),
+                userPrincipal);
 
         var refreshTokenEntity = refreshTokenService.createRefreshToken(user.getEmail());
 
         return AuthenticationResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshTokenEntity.getToken())
+                .userId(user.getUserId())
                 .email(user.getEmail())
                 .role(user.getRole().getName())
                 .build();

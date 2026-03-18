@@ -6,6 +6,7 @@ import com.crs.iamservice.dto.request.AdminUserUpdateRequest;
 import com.crs.iamservice.dto.request.UserSearchRequest;
 import com.crs.iamservice.dto.response.AdminUserResponse;
 import com.crs.iamservice.dto.response.PageResponse;
+import com.crs.iamservice.dto.response.UserStatsResponse;
 import com.crs.iamservice.entity.Role;
 import com.crs.iamservice.entity.User;
 import com.crs.iamservice.exception.DuplicateResourceException;
@@ -27,6 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -341,6 +343,19 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .isDeleted(user.isDeleted())
                 .createdAt(user.getCreatedAt())
                 .role(roleInfo)
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserStatsResponse getUserStats(int days) {
+        log.info("Lấy thống kê user cho dashboard, khoảng {} ngày", days);
+        LocalDateTime since = LocalDateTime.now().minusDays(days);
+        return UserStatsResponse.builder()
+                .totalUsers(userRepository.countTotalActiveUsers())
+                .totalCustomers(userRepository.countTotalCustomers())
+                .newCustomers(userRepository.countNewCustomersSince(since))
+                .totalDrivers(userRepository.countTotalDrivers())
                 .build();
     }
 }
