@@ -67,6 +67,7 @@ public class AuthenticationController {
                             AuthenticationResponse.builder()
                                     .accessToken(accessToken)
                                     .refreshToken(request.refreshToken())
+                                    .userId(user.getUserId())
                                     .email(user.getEmail())
                                     .role(user.getRole().getName())
                                     .build()

@@ -100,6 +100,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return AuthenticationResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshTokenEntity.getToken())
+                .userId(user.getUserId())
                 .email(user.getEmail())
                 .role(user.getRole().getName())
                 .build();
