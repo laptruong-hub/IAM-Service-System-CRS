@@ -68,6 +68,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .email(request.email())
                 .passwordHash(passwordEncoder.encode(request.password()))
                 .fullName(request.fullName())
+                .phone(request.phoneNumber())
                 .role(defaultRole)
                 .isActive(true) // Sử dụng @Builder.Default đã sửa ở bước trước
                 .build();
@@ -146,8 +147,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         // 3. Map sang DTO trả về
         return UserResponse.builder()
+                .id(user.getUserId())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
+                .phone(user.getPhone())
+                .dob(user.getDob() != null ? user.getDob().toString() : null)
+                .gender(user.getGender())
+                .createdAt(user.getCreatedAt() != null ? user.getCreatedAt().toString() : null)
                 .role(user.getRole().getName())
                 .isActive(user.isActive())
                 .build();
