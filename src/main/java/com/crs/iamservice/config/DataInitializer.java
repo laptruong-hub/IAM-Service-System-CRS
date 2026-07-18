@@ -75,7 +75,7 @@ public class DataInitializer implements CommandLineRunner {
             driverPerms.add(pViewTrip);       // Để xem lộ trình
             driverPerms.add(pUpdateTrip);     // Để cập nhật trạng thái chuyến đi
             driverPerms.add(pReportIssue);    // Để báo cáo hỏng hóc
-            createRole("DRIVER", driverPerms);
+            Role roleDriver = createRole("DRIVER", driverPerms);
 
             // 3. Tạo User Admin mặc định
             if (!userRepository.existsByEmail("admin@rental.com")) {
@@ -88,6 +88,33 @@ public class DataInitializer implements CommandLineRunner {
                         .build();
                 userRepository.save(admin);
                 log.info("Đã tạo tài khoản Admin mặc định: admin@rental.com / admin123");
+            }
+
+            // 4. Tạo User Staff
+            if (!userRepository.existsByEmail("staff@gmail.com")) {
+                User staff = User.builder()
+                        .email("staff@gmail.com")
+                        .fullName("Staff Account")
+                        .passwordHash(passwordEncoder.encode("staff123"))
+                        .role(roleStaff)
+                        .isActive(true)
+                        .build();
+                userRepository.save(staff);
+                log.info("Đã tạo tài khoản Staff mặc định: staff@gmail.com / staff123");
+            }
+
+            // 5. Tạo User Driver
+            if (!userRepository.existsByEmail("driver@gmail.com")) {
+                User driver = User.builder()
+                        .userId("d0000000-0000-0000-0000-000000000001")
+                        .email("driver@gmail.com")
+                        .fullName("Driver Account")
+                        .passwordHash(passwordEncoder.encode("driver123"))
+                        .role(roleDriver)
+                        .isActive(true)
+                        .build();
+                userRepository.save(driver);
+                log.info("Đã tạo tài khoản Driver mặc định: driver@gmail.com / driver123");
             }
         }
     }
