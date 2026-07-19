@@ -1,0 +1,60 @@
+name: IAM Service CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # (Tùy chọn) Setup JDK nếu bạn muốn chạy unit test trước khi build Docker
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Run Maven Tests (Optional)
+      run: mvn -B test --file pom.xml
+      continue-on-error: true # Cho phép đi tiếp dù test fail (bạn có thể bỏ dòng này nếu muốn bắt buộc pass test)
+
+    # 1. Đăng nhập vào Docker Hub
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    # 2. Build và Push Docker Image lên Docker Hub
+    - name: Build and Push Docker Image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        # THAY ĐỔI: Sửa 'yourdockerhub' thành tên username Docker Hub của bạn
+        tags: laptruong299/iam-service:latest
+
+  deploy:
+    needs: build-and-push # Đợi job build-and-push xong mới chạy deploy
+    runs-on: ubuntu-latest
+    # CHÚ Ý: Nếu bạn chưa có Server thật thì có thể tạm ẩn Job Deploy này bằng cách comment lại
+    steps:
+    - name: Deploy to Server via SSH
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        # Kịch bản chạy trên server:
+        script: |
+          cd /path/to/your/crs-deployment-repo
+          docker-compose pull iam-service
+          docker-compose up -d iam-service

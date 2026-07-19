@@ -106,7 +106,6 @@ public class DataInitializer implements CommandLineRunner {
             // 5. Tạo User Driver
             if (!userRepository.existsByEmail("driver@gmail.com")) {
                 User driver = User.builder()
-                        .userId("d0000000-0000-0000-0000-000000000001")
                         .email("driver@gmail.com")
                         .fullName("Driver Account")
                         .passwordHash(passwordEncoder.encode("driver123"))
